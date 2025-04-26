@@ -78,10 +78,10 @@ def gacha(
             # Do 50/50 for 5-star if not guaranteed
             is_five_win = random.randint(1, 100) < 51
             if is_five_win:
-                outcome = '5* FEATURED:' + five_star
+                outcome = '5* FEATURED: ' + five_star
                 is_five_guaranteed = False
             else:
-                outcome = '5* STANDARD:' + std_five[random.randint(0, len(std_five) - 1)]
+                outcome = '5* STANDARD: ' + std_five[random.randint(0, len(std_five) - 1)]
                 is_five_guaranteed = True
 
     # User does NOT roll a 5-star
@@ -93,18 +93,18 @@ def gacha(
         if is_four:
             post_four_pity = 1 # resets 4-star pity
             if is_four_guaranteed:
-                outcome = '4* FEATURED:' + four_stars[random.randint(0, 2)]
+                outcome = '4* FEATURED: ' + four_stars[random.randint(0, 2)]
                 is_four_guaranteed = False
             else:
                 # Do 50/50 for 4-star if not guaranteed
                 is_four_win = random.randint(1, 100) < 51
                 if is_four_win:
-                    outcome = '4* FEATURED:' + four_stars[random.randint(0, 2)]
+                    outcome = '4* FEATURED: ' + four_stars[random.randint(0, 2)]
                     is_four_guaranteed = False
                 else:
-                    outcome = '4* STANDARD:' + std_four[random.randint(0, len(std_four) - 1)]
+                    outcome = '4* STANDARD: ' + std_four[random.randint(0, len(std_four) - 1)]
                     while outcome in four_stars:
-                        outcome = '4* STANDARD:' + std_four[random.randint(0, len(std_four) - 1)]
+                        outcome = '4* STANDARD: ' + std_four[random.randint(0, len(std_four) - 1)]
                     is_four_guaranteed = True
 
         # user does NOT roll a 4-star either, resorts to 3-star
