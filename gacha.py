@@ -36,7 +36,7 @@ std_five = ['Himeko', 'Bronya', 'Clara', 'Welt', 'Gepard', 'Bailu', 'Yanqing', '
 std_four = ["Arlan", "Asta", "Dan Heng", "Gallagher", "Guinaifen", "Hanya", "Herta", "Hook", "Luka", "Lynx", "March 7th", "Misha", "Moze", "Natasha", "Pela", "Qingque", "Sampo", "Serval", "Sushang", "Tingyun", "Xueyi", "Yukong", "Post-Op Conversation", "Good Night and Sleep Well", "Day One of My New Life", "Only Silence Remains", "Memories of the Past", "The Moles Welcome You", "The Birth of the Self", "Shared Feeling", "Eyes of the Prey", "Landau's Choice", "Swordplay", "Planetary Rendezvous", "A Secret Vow", "Make the World Clamor", "Perfect Timing", "Resolution Shines As Pearls of Sweat", "Trend of the Universal Market", "Subscribe for More!", "Dance! Dance! Dance!", "Under the Blue Sky", "Geniuses' Repose", "Indelible Promise", "Concert for Two", "Boundless Choreo", "After the Charmony Fall", "Poised to Bloom", "Shadowed by Night", "Dream's Montage", "Geniuses' Greetings"]
 
 
-def gacha(
+def pull(
     curr_four_pity: int = 0,
     curr_five_pity: int = 0,
     four_stars = None,
@@ -73,15 +73,18 @@ def gacha(
         post_five_pity = 1
         if is_five_guaranteed:
             outcome = five_star
+            rarity = 5
             is_five_guaranteed = False
         else:
             # Do 50/50 for 5-star if not guaranteed
             is_five_win = random.randint(1, 100) < 51
             if is_five_win:
                 outcome = '5* FEATURED: ' + five_star
+                rarity = 5
                 is_five_guaranteed = False
             else:
                 outcome = '5* STANDARD: ' + std_five[random.randint(0, len(std_five) - 1)]
+                rarity = 5
                 is_five_guaranteed = True
 
     # User does NOT roll a 5-star
@@ -94,41 +97,45 @@ def gacha(
             post_four_pity = 1 # resets 4-star pity
             if is_four_guaranteed:
                 outcome = '4* FEATURED: ' + four_stars[random.randint(0, 2)]
+                rarity = 4
                 is_four_guaranteed = False
             else:
                 # Do 50/50 for 4-star if not guaranteed
                 is_four_win = random.randint(1, 100) < 51
                 if is_four_win:
                     outcome = '4* FEATURED: ' + four_stars[random.randint(0, 2)]
+                    rarity = 4
                     is_four_guaranteed = False
                 else:
                     outcome = '4* STANDARD: ' + std_four[random.randint(0, len(std_four) - 1)]
                     while outcome in four_stars:
                         outcome = '4* STANDARD: ' + std_four[random.randint(0, len(std_four) - 1)]
+                    rarity = 4
                     is_four_guaranteed = True
 
         # user does NOT roll a 4-star either, resorts to 3-star
         else:
             post_four_pity += 1 # increments 4-star pity
             outcome = '3* : ' + std_three[random.randint(0, len(std_three) - 1)] # choose a random 3-star LC
+            rarity = 3
 
-    return [outcome, post_four_pity, post_five_pity, is_four_guaranteed, is_five_guaranteed]
+    return [outcome, rarity, post_four_pity, post_five_pity, is_four_guaranteed, is_five_guaranteed]
 
 
 # Testing purposes
 if __name__ == '__main__':
-    four_pity = 0
-    five_pity = 0
-    four_guaranteed = False
-    five_guaranteed = False
+    # four_pity = 0
+    # five_pity = 0
+    # four_guaranteed = False
+    # five_guaranteed = False
+    #
+    # for i in range(100):
+    #     p = pull(four_pity, five_pity, ['Pela', 'Lynx', 'Gallagher'], 'Castorice', four_guaranteed, five_guaranteed)
+    #
+    #     four_pity, five_pity = p[1], p[2]
+    #     four_guaranteed, five_guaranteed = p[3], p[4]
+    #
+    #     print(f'PULL #{i+1}: {p[0]} | [4* {p[1]}/10 | 5* {p[2]}/90]')
 
-
-    for i in range(100):
-        p = gacha(four_pity, five_pity, ['Pela', 'Lynx', 'Gallagher'], 'Castorice', four_guaranteed, five_guaranteed)
-
-        four_pity, five_pity = p[1], p[2]
-        four_guaranteed, five_guaranteed = p[3], p[4]
-
-        print(f'PULL #{i+1}: {p[0]} | [4* {p[1]}/10 | 5* {p[2]}/90]')
-
-        # {'GUARANTEED' if p[3] else 'ON 50/50'}{'GUARANTEED' if p[4] else 'ON 50/50'}
+    # {'GUARANTEED' if p[3] else 'ON 50/50'}{'GUARANTEED' if p[4] else 'ON 50/50'}
+    pass

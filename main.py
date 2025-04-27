@@ -1,10 +1,9 @@
 import nextcord
 from nextcord import Intents
 from nextcord.ext import commands
-
+from dataclasses import dataclass
 from bot_token import TOKEN
-
-from random import randrange
+import gacha
 
 
 # BOT SETUP
@@ -19,7 +18,7 @@ mem.remove_command('help')
 # Ping Command
 @mem.slash_command(name='ping')
 async def ping(interaction: nextcord.Interaction):
-    await interaction.response.send_message(f'Pong :ping_pong:: {round(mem.latency * 1000)} ms ')
+    await interaction.response.send_message(f'Mem! :ping_pong:: {round(mem.latency * 1000)} ms ')
 
 # Help Command
 @mem.slash_command(name='help', description='List of commands')
@@ -34,15 +33,83 @@ async def help(interaction: nextcord.Interaction):
     help_embed.add_field(name=':wrench: Utility Commands', value='`/help` - Displays this message \n'
                                                                  '`/ping` - Returns the latency of the bot',
                          inline=False)
-    help_embed.add_field(name=':jigsaw: Wordle Commands', value='`/tutorial` - Displays how to play Wordle\n'
-                                                                '`/wordle` - Initiates a Wordle game \n'
-                                                                '`>input (word)` - Guessing a word for the puzzle',
+    help_embed.add_field(name=':slot_machine: Gacha Commands', value='`/pull` - Do a single pull \n'
+                                                                '`/multipull` - Do 10 pulls',
                          inline=False)
     help_embed.add_field(name=':bulb: More Features Coming Soon!', value='', inline=False)
 
     await interaction.response.send_message(embed=help_embed)
 
 
+# GLOBAL STATS
+class GachaState:
+    four_pity: int = 0
+    five_pity: int = 0
+    four_guaranteed: bool = False
+    five_guaranteed: bool = False
+
+g = GachaState()
+
+# Pull Command
+@mem.slash_command(name='pull', description='Do a single pull')
+async def pull(interaction: nextcord.Interaction):
+
+    p = gacha.pull(g.four_pity, g.five_pity, ['Pela', 'Lynx', 'Gallagher'], 'Castorice', g.four_guaranteed, g.five_guaranteed)
+    rgb = [224, 181, 70] if p[1] == 5 else [175, 89, 212] if p[1] == 4 else [89, 153, 212]
+
+    g.four_pity, g.five_pity, g.four_guaranteed, g.five_guaranteed = p[2], p[3], p[4],p[5]
+
+    pull_outcome = nextcord.Embed(
+        title='Pull Result',
+        description=f'4* PITY: {p[2]}/10 | 50/50? {'NO' if p[4] else 'YES'}\n'
+                    f'5* PITY: {p[3]}/90 | 50/50? {'NO' if p[5] else 'YES'}',
+        colour=nextcord.Colour.from_rgb(rgb[0], rgb[1], rgb[2])
+    )
+
+    pull_outcome.add_field(
+        name=f'PITY {p[3] - 1}',
+        value=f'{':star:' * p[1]} | {p[0]}',
+        inline=False
+    )
+
+    await interaction.response.send_message(embed=pull_outcome)
+
+# 10-PullCommand
+@mem.slash_command(name='multipull', description='Do 10 pulls')
+async def multipull(interaction: nextcord.Interaction):
+
+    pulls = [None for _ in range(10)]
+
+    for i in range(10):
+        outcome = gacha.pull(g.four_pity, g.five_pity, ['Pela', 'Lynx', 'Gallagher'], 'Castorice', g.four_guaranteed, g.five_guaranteed)
+        pulls[i] = outcome
+        g.four_pity, g.five_pity, g.four_guaranteed, g.five_guaranteed = outcome[2], outcome[3], outcome[4], outcome[5]
+
+    rgb = [89, 153, 212]
+
+    for pull in pulls:
+        if pull[1] == 4:
+            rgb = [175, 89, 212]
+        elif pull[1] == 5:
+            rgb = [224, 181, 70]
+            break
+
+
+    pull_outcome = nextcord.Embed(
+        title='Pull Result',
+        description=f'4* PITY: {pulls[9][2]}/10 | 50/50? {'NO' if pulls[9][4] else 'YES'}\n'
+                    f'5* PITY: {pulls[9][3]}/90 | 50/50? {'NO' if pulls[9][5] else 'YES'}',
+        colour=nextcord.Colour.from_rgb(rgb[0], rgb[1], rgb[2])
+    )
+
+    for i in range(len(pulls)):
+        pull_outcome.add_field(
+            name=f'PITY {pulls[i][3]-1}',
+            value=f'{':star:' * pulls[i][1]} | {pulls[i][0]}',
+            inline=False
+        )
+
+    await interaction.response.send_message(embed=pull_outcome)
 
 '''
 =================================================== WORDLE GAME ========================================================
